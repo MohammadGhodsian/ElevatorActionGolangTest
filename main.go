@@ -21,20 +21,42 @@ func (p Person) direction() Direction {
 	return Down
 }
 
-type Elevator struct {
-	CurrentFloor int
-	Direction    Direction
-}
+// type Elevator struct {
+// 	CurrentFloor int
+// 	Direction    Direction
+// }
 
-func (e *Elevator) move() {
-	if e.Direction == Up {
-		e.CurrentFloor++
-	} else if e.Direction == Down {
-		e.CurrentFloor--
-	}
-}
+// func (e *Elevator) move() {
+// 	if e.Direction == Up {
+// 		e.CurrentFloor++
+// 	} else if e.Direction == Down {
+// 		e.CurrentFloor--
+// 	}
+// }
 
 func Order(startingFloor int, queue []Person) []int {
+	if len(queue) == 0 {
+		return []int{startingFloor}
+	}
+	// rresult list of floors
+	resultStops := []int{}
+	// current passengers in elevator
+	passengers := []Person{}
+	// current floor of elevator in each step
+	currentFloor := startingFloor
+	// intial the direction of elevator by first person in list
+	direction := queue[0].direction()
+	// create queue of up and down (passengers directions)
+	downQueue := []Person{}
+	upQueue := []Person{}
+	for _, person := range queue {
+		if person.direction() == Up {
+			upQueue = append(upQueue, person)
+		} else {
+			downQueue = append(downQueue, person)
+		}
+	}
+
 	return []int{}
 }
 
