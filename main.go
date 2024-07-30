@@ -62,12 +62,25 @@ func Order(startingFloor int, queue []Person) []int {
 	}
 
 	for len(upQueue) > 0 || len(downQueue) > 0 || len(passengers) > 0 {
+		// Manage the direction based on the passenger queue and destination
 		if len(passengers) == 0 {
 			if direction == Up && len(upQueue) == 0 {
 				direction = Down
 			} else if direction == Down && len(downQueue) == 0 {
 				direction = Up
 			}
+		}
+
+		// Drop off passengers
+		droppedOff := false
+		for i := 0; i < len(passengers); i++ {
+			if passengers[i].To == currentFloor {
+				passengers = append(passengers[:i], passengers[i+1:]...)
+				droppedOff = true
+			}
+		}
+		if droppedOff {
+			// add stop
 		}
 	}
 
