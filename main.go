@@ -18,3 +18,16 @@ func (p Person) direction() Direction {
 	}
 	return Down
 }
+
+type Elevator struct {
+	CurrentFloor int
+	Direction    Direction
+}
+
+func (e *Elevator) move() {
+	if e.Direction == Up {
+		e.CurrentFloor++
+	} else if e.Direction == Down {
+		e.CurrentFloor--
+	}
+}
