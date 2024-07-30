@@ -15,6 +15,10 @@ type Person struct {
 }
 
 func (p Person) direction() Direction {
+	return direction(p.From, p.To)
+}
+
+func direction(from, to int) Direction {
 	if p.From < p.To {
 		return Up
 	}
@@ -45,7 +49,7 @@ func Order(startingFloor int, queue []Person) []int {
 	// current floor of elevator in each step
 	currentFloor := startingFloor
 	// intial the direction of elevator by first person in list
-	direction := queue[0].direction()
+	direction := direction(queue[0].From, currentFloor)
 	// create queue of up and down (passengers directions)
 	downQueue := []Person{}
 	upQueue := []Person{}
@@ -54,6 +58,16 @@ func Order(startingFloor int, queue []Person) []int {
 			upQueue = append(upQueue, person)
 		} else {
 			downQueue = append(downQueue, person)
+		}
+	}
+
+	for len(upQueue) > 0 || len(downQueue) > 0 || len(passengers) > 0 {
+		if len(passengers) == 0 {
+			if direction == Up && len(upQueue) == 0 {
+				direction = Down
+			} else if direction == Down && len(downQueue) == 0 {
+				direction = Up
+			}
 		}
 	}
 
