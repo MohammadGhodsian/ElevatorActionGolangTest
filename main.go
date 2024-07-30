@@ -11,3 +11,10 @@ type Person struct {
 	From int
 	To   int
 }
+
+func (p Person) direction() Direction {
+	if p.From < p.To {
+		return Up
+	}
+	return Down
+}
