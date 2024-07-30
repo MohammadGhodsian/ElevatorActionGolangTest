@@ -82,6 +82,25 @@ func Order(startingFloor int, queue []Person) []int {
 		if droppedOff {
 			// add stop
 		}
+
+		// Pick up passengers
+		pickedUp := false
+		var directionQueue *[]Person
+		if direction == Up {
+			directionQueue = &upQueue
+		} else {
+			directionQueue = &downQueue
+		}
+		for i := 0; i < len(*directionQueue); i++ {
+			if (*directionQueue)[i].From == currentFloor {
+				passengers = append(passengers, (*directionQueue)[i])
+				*directionQueue = append((*directionQueue)[:i], (*directionQueue)[i+1:]...)
+				pickedUp = true
+			}
+		}
+		if pickedUp {
+			// add stop
+		}
 	}
 
 	return []int{}
