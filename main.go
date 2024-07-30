@@ -61,6 +61,12 @@ func Order(startingFloor int, queue []Person) []int {
 		}
 	}
 
+	addStop := func(floor int) {
+		if len(resultStops) == 0 || resultStops[len(resultStops)-1] != floor {
+			resultStops = append(resultStops, floor)
+		}
+	}
+
 	for len(upQueue) > 0 || len(downQueue) > 0 || len(passengers) > 0 {
 		// Manage the direction based on the passenger queue and destination
 		if len(passengers) == 0 {
@@ -80,7 +86,7 @@ func Order(startingFloor int, queue []Person) []int {
 			}
 		}
 		if droppedOff {
-			// add stop
+			addStop(currentFloor)
 		}
 
 		// Pick up passengers
@@ -99,7 +105,7 @@ func Order(startingFloor int, queue []Person) []int {
 			}
 		}
 		if pickedUp {
-			// add stop
+			addStop(currentFloor)
 		}
 	}
 
