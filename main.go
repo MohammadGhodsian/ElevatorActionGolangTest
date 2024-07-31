@@ -27,112 +27,81 @@ func direction(from, to int) Direction {
 	return Down
 }
 
-// type Elevator struct {
-// 	CurrentFloor int
-// 	Direction    Direction
-// }
-
-// func (e *Elevator) move() {
-// 	if e.Direction == Up {
-// 		e.CurrentFloor++
-// 	} else if e.Direction == Down {
-// 		e.CurrentFloor--
-// 	}
-// }
-
 func Order(startingFloor int, queue []Person) []int {
 	if len(queue) == 0 {
 		return []int{startingFloor}
 	}
-	// rresult list of floors
+
 	resultStops := []int{}
-	// current passengers in elevator
 	passengers := []Person{}
-	// current floor of elevator in each step
 	currentFloor := startingFloor
-	// intial the direction of elevator by first person in list
-	var directionElev Direction = direction(currentFloor, queue[0].From)
-	// // create queue of up and down (passengers directions)
-	// downQueue := []Person{}
-	// upQueue := []Person{}
-	// for _, person := range queue {
-	// 	if person.direction() == Up {
-	// 		upQueue = append(upQueue, person)
-	// 	} else {
-	// 		downQueue = append(downQueue, person)
-	// 	}
-	// }
 
-	addStop := func(floor int) {
-		if len(resultStops) == 0 || resultStops[len(resultStops)-1] != floor {
-			resultStops = append(resultStops, floor)
-		}
-	}
-	elevatorMustMove := func() bool {
-		return len(queue) > 0 || len(passengers) > 0
-	}
-
-	for elevatorMustMove() {
-
-		// Drop off passengers
-		droppedOff := false
-		for i := 0; i < len(passengers); i++ {
-			if passengers[i].To == currentFloor {
-				fmt.Printf("droppedOff  %v   %v  currentFloor %d     queue %+v   passengers %+v\n", droppedOff, passengers[i], currentFloor, queue, passengers)
-				passengers = append(passengers[:i], passengers[i+1:]...)
-				i--
-				droppedOff = true
-			}
-		}
-		if droppedOff {
-			addStop(currentFloor)
-		}
-
-		if !elevatorMustMove() {
+	for hasWork(queue, passengers) {
+		dropOffPassengers(&passengers, currentFloor, &resultStops)
+		if !hasWork(queue, passengers) {
 			break
 		}
 
-		// // Manage the direction based on the passenger queue and destination
-		if len(passengers) == 0 {
-			if currentFloor != queue[0].From {
-				directionElev = direction(currentFloor, queue[0].From)
-			} else {
-				directionElev = direction(currentFloor, queue[0].To)
-			}
-		} else {
-			directionElev = direction(currentFloor, passengers[0].To)
-		}
-
-		// Pick up passengers
-		pickedUp := false
-		for i := 0; i < len(queue); i++ {
-			if queue[i].direction() == directionElev && queue[i].From == currentFloor {
-				fmt.Printf("pickedUp  %v   %v    currentFloor %d    queue %+v   passengers %+v\n", pickedUp, queue[i], currentFloor, queue, passengers)
-				passengers = append(passengers, queue[i])
-				queue = append(queue[:i], queue[i+1:]...)
-				i--
-				pickedUp = true
-			}
-		}
-		if pickedUp {
-			addStop(currentFloor)
-		}
-
-		// Determine the next floor to move to
-		if elevatorMustMove() {
-			if directionElev == Up {
-				currentFloor++
-			} else {
-				currentFloor--
-			}
-		}
+		directionElev := determineDirection(queue, passengers, currentFloor)
+		pickUpPassengers(&queue, &passengers, currentFloor, directionElev, &resultStops)
+		moveElevator(&currentFloor, directionElev)
 	}
 
 	return resultStops
 }
 
-func main() {
+func hasWork(queue []Person, passengers []Person) bool {
+	return len(queue) > 0 || len(passengers) > 0
+}
 
+func dropOffPassengers(passengers *[]Person, currentFloor int, resultStops *[]int) {
+	for i := 0; i < len(*passengers); i++ {
+		if (*passengers)[i].To == currentFloor {
+			fmt.Printf("Dropped off %v at floor %d\n", (*passengers)[i], currentFloor)
+			*passengers = append((*passengers)[:i], (*passengers)[i+1:]...)
+			i--
+			addStop(currentFloor, resultStops)
+		}
+	}
+}
+
+func determineDirection(queue []Person, passengers []Person, currentFloor int) Direction {
+	if len(passengers) == 0 {
+		if currentFloor != queue[0].From {
+			return direction(currentFloor, queue[0].From)
+		}
+		return direction(currentFloor, queue[0].To)
+	}
+	return direction(currentFloor, passengers[0].To)
+}
+
+func pickUpPassengers(queue *[]Person, passengers *[]Person, currentFloor int, directionElev Direction, resultStops *[]int) {
+	for i := 0; i < len(*queue); i++ {
+		if (*queue)[i].direction() == directionElev && (*queue)[i].From == currentFloor {
+			fmt.Printf("Picked up %v at floor %d\n", (*queue)[i], currentFloor)
+			*passengers = append(*passengers, (*queue)[i])
+			*queue = append((*queue)[:i], (*queue)[i+1:]...)
+			i--
+			addStop(currentFloor, resultStops)
+		}
+	}
+}
+
+func moveElevator(currentFloor *int, directionElev Direction) {
+	if directionElev == Up {
+		*currentFloor++
+	} else {
+		*currentFloor--
+	}
+}
+
+func addStop(floor int, resultStops *[]int) {
+	if len(*resultStops) == 0 || (*resultStops)[len(*resultStops)-1] != floor {
+		*resultStops = append(*resultStops, floor)
+	}
+}
+
+func main() {
 	queue := []Person{
 		{From: 3, To: 2}, // Al
 		{From: 5, To: 2}, // Betty
@@ -145,15 +114,16 @@ func main() {
 	result := Order(startingFloor, queue)
 	fmt.Println(result) // Expected: []int{2, 5, 4, 3, 2, 1}
 
-	queue = []Person{{From: 5, To: 4}, // 1st passenger
+	queue = []Person{
+		{From: 5, To: 4},  // 1st passenger
 		{From: 5, To: 3},  // 2nd passenger
 		{From: 3, To: 4},  // 3rd passenger
 		{From: 0, To: 2},  // 5th passenger
 		{From: 3, To: -4}, // 4th passenger
-		{From: 1, To: 2}}
+		{From: 1, To: 2},
+	}
 	startingFloor = 5
 
 	result = Order(startingFloor, queue)
 	fmt.Println(result) // Expected: []int{5, 4, 3, 4, 3, -4, 0, 1, 2}
-
 }
