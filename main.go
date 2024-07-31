@@ -66,21 +66,24 @@ func Order(startingFloor int, queue []Person) []int {
 			resultStops = append(resultStops, floor)
 		}
 	}
-
-	for len(queue) > 0 || len(passengers) > 0 {
+	elevatorMustMove := func() bool {
+		return len(queue) > 0 || len(passengers) > 0
+	}
+	for elevatorMustMove() {
 		// Manage the direction based on the passenger queue and destination
 		if len(passengers) == 0 {
 			directionElev = direction(currentFloor, queue[0].From)
 		} else {
-			directionElev = direction(currentFloor, passengers[0].From)
+			directionElev = direction(currentFloor, passengers[0].To)
 		}
 
 		// Drop off passengers
 		droppedOff := false
 		for i := 0; i < len(passengers); i++ {
 			if passengers[i].To == currentFloor {
-				fmt.Printf("droppedOff  %v   %v\n", droppedOff, passengers[i])
+				fmt.Printf("droppedOff  %v   %v  currentFloor %d\n", droppedOff, passengers[i], currentFloor)
 				passengers = append(passengers[:i], passengers[i+1:]...)
+				i--
 				droppedOff = true
 			}
 		}
@@ -92,32 +95,25 @@ func Order(startingFloor int, queue []Person) []int {
 		pickedUp := false
 		for i := 0; i < len(queue); i++ {
 			if queue[i].direction() == directionElev && queue[i].From == currentFloor {
-				fmt.Printf("pickedUp  %v   %v\n", pickedUp, queue[i])
+				fmt.Printf("pickedUp  %v   %v    currentFloor %d\n", pickedUp, queue[i], currentFloor)
 				passengers = append(passengers, queue[i])
 				queue = append(queue[:i], queue[i+1:]...)
+				i--
 				pickedUp = true
 			}
 		}
 		if pickedUp {
-			fmt.Printf("here   len(*directionQueue)  %d   %+v\n", len(queue), queue)
 			addStop(currentFloor)
 		}
 
 		// Determine the next floor to move to
-		// Determine the next floor to move to
-		if directionElev == Up {
-			if len(passengers) > 0 {
-				currentFloor++
-			} else {
-				directionElev = Down
-			}
+		// if len(passengers) > 0 {
+		if elevatorMustMove() && directionElev == Up {
+			currentFloor++
 		} else {
-			if len(passengers) > 0 {
-				currentFloor--
-			} else {
-				directionElev = Up
-			}
+			currentFloor--
 		}
+		// }
 	}
 
 	return resultStops
@@ -125,14 +121,13 @@ func Order(startingFloor int, queue []Person) []int {
 
 func main() {
 	queue := []Person{
-		{From: 5, To: 4}, // 1st passenger
-		{From: 5, To: 3}, // 2nd passenger
-		{From: 3, To: 4}, // 3rd passenger
-		{From: 0, To: 2}, // 5th passenger
-		{From: 3, To: 2}, // 4th passenger
-		{From: 1, To: 2}, // 6th passenger
+		{From: 3, To: 2}, // Al
+		{From: 5, To: 2}, // Betty
+		{From: 2, To: 1}, // Charles
+		{From: 2, To: 5}, // Dan
+		{From: 4, To: 3}, // Ed
 	}
-	startingFloor := 5
+	startingFloor := 1
 	result := Order(startingFloor, queue)
 	fmt.Println(result) // Expected: []int{5, 4, 3, 4, 3, -4, 0, 1, 2}
 }
