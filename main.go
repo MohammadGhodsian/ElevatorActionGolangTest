@@ -100,30 +100,3 @@ func addStop(floor int, resultStops *[]int) {
 		*resultStops = append(*resultStops, floor)
 	}
 }
-
-func main() {
-	queue := []Person{
-		{From: 3, To: 2}, // Al
-		{From: 5, To: 2}, // Betty
-		{From: 2, To: 1}, // Charles
-		{From: 2, To: 5}, // Dan
-		{From: 4, To: 3}, // Ed
-	}
-	startingFloor := 1
-
-	result := Order(startingFloor, queue)
-	fmt.Println(result) // Expected: []int{2, 5, 4, 3, 2, 1}
-
-	queue = []Person{
-		{From: 5, To: 4},  // 1st passenger
-		{From: 5, To: 3},  // 2nd passenger
-		{From: 3, To: 4},  // 3rd passenger
-		{From: 0, To: 2},  // 5th passenger
-		{From: 3, To: -4}, // 4th passenger
-		{From: 1, To: 2},
-	}
-	startingFloor = 5
-
-	result = Order(startingFloor, queue)
-	fmt.Println(result) // Expected: []int{5, 4, 3, 4, 3, -4, 0, 1, 2}
-}
